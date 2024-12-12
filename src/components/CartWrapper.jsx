@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 
 export default function CartWrapper({ cartProducts, setCartProducts }) {
   let price;
   let modifiedPrice;
   let combinedPrice;
   let modifiedCombinedPrice;
+
+  const [isModalOpen, setModal] = useState(false);
 
   const calculateTotalInCart = () => {
     return cartProducts.reduce((sum, product) => sum + product.amount, 0);
@@ -15,7 +17,20 @@ export default function CartWrapper({ cartProducts, setCartProducts }) {
     .toLocaleString();
 
   const modifiedTotalAmount =
-    totalAmount.length >= 4 ? `$${totalAmount}0` : `$${totalAmount}.00`;
+    totalAmount.length >= 3 ? `$${totalAmount}0` : `$${totalAmount}.00`;
+
+  const resetOrder = () => {
+    setCartProducts([]);
+    setModal(false);
+  };
+
+  const openModal = () => {
+    setModal(true);
+  };
+
+  const closeModal = () => {
+    setModal(false);
+  };
 
   return (
     <div className="bg-white w-full lg:basis-[35rem] rounded-xl py-6 px-6">
@@ -25,15 +40,14 @@ export default function CartWrapper({ cartProducts, setCartProducts }) {
       {cartProducts.length ? (
         <div>
           <div className="mb-4">
-            {cartProducts.map((product) => {
+            {cartProducts.map((product, index) => {
               price = product.price.toLocaleString();
-              modifiedPrice =
-                price.length === 3 ? `$${price}0` : `$${price}.00`;
+              modifiedPrice = price.length >= 3 ? `$${price}0` : `$${price}.00`;
               combinedPrice = (
                 Number(product.price) * product.amount
               ).toLocaleString();
               modifiedCombinedPrice =
-                combinedPrice.length === 3
+                combinedPrice.length >= 3
                   ? `$${combinedPrice}0`
                   : `$${combinedPrice}.00`;
 
@@ -45,7 +59,10 @@ export default function CartWrapper({ cartProducts, setCartProducts }) {
                 );
               };
               return (
-                <div className="border-b-[0.1em] flex justify-between items-start py-4 border-rose100">
+                <div
+                  key={index}
+                  className="border-b-[0.1em] flex justify-between items-start py-4 border-rose100"
+                >
                   <div>
                     <h1 className="text-[0.9rem] text-rose900 font-medium mb-2">
                       {product.name}
@@ -89,6 +106,7 @@ export default function CartWrapper({ cartProducts, setCartProducts }) {
             </p>
           </div>
           <button
+            onClick={openModal}
             className="w-full hover:bg-[#8e290b] bg-customRed rounded-full text-rose50 font-medium 
           py-3 text-[0.9rem]"
           >
@@ -108,14 +126,83 @@ export default function CartWrapper({ cartProducts, setCartProducts }) {
         </div>
       )}
 
-      <div className="fixed grid place-items-center inset-0 bg-[#00000057]">
-        <div className="bg-rose50 p-5 rounded-md w-[500px]">
-          <img className="mb-4" src="../icon-order-confirmed.svg" alt="" />
-          <h1 className="text-rose900 mb-1 font-extrabold text-[2rem]">Order Confirmed</h1>
-          <p className="text-rose500 text-[0.9rem] font-medium mb-4">We hope you enjoy your food</p>
-
+      {isModalOpen && (
+        <div className="fixed grid place-items-center inset-0">
+          <span
+            onClick={closeModal}
+            className="bg-[#00000090] absolute inset-0"
+          ></span>
+          <div className="bg-rose50 p-5 rounded-md w-full z-10 max-h-[35rem] overflow-scroll md:w-[500px]">
+            <img className="mb-4" src="../icon-order-confirmed.svg" alt="" />
+            <h1 className="text-rose900 mb-1 font-extrabold text-[2rem]">
+              Order Confirmed
+            </h1>
+            <p className="text-rose500 text-[0.9rem] font-medium mb-4">
+              We hope you enjoy your food
+            </p>
+            <div className="bg-rose100 px-5 pt-2 pb-5 mb-6 rounded-lg">
+              {cartProducts.map((product, index) => {
+                price = product.price.toLocaleString();
+                modifiedPrice =
+                  price.length >= 3 ? `$${price}0` : `$${price}.00`;
+                combinedPrice = (
+                  Number(product.price) * product.amount
+                ).toLocaleString();
+                modifiedCombinedPrice =
+                  combinedPrice.length >= 3
+                    ? `$${combinedPrice}0`
+                    : `$${combinedPrice}.00`;
+                return (
+                  <div
+                    key={index}
+                    className="flex justify-between items-center py-4 border-b-[0.05em] border-rose300"
+                  >
+                    <div className="flex gap-4 items-center">
+                      <img
+                        className="w-[50px] rounded-lg"
+                        src={product.img}
+                        alt=""
+                      />
+                      <div>
+                        <h1 className="text-[0.9rem] text-rose900 font-semibold mb-1">
+                          {product.name}
+                        </h1>
+                        <div className="flex items-center gap-3">
+                          <p className="text-customRed font-semibold">
+                            {product.amount}x
+                          </p>
+                          <p className="text-rose500 text-[0.9rem]">
+                            {`@ ${modifiedPrice}`}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-rose500 font-semibold text-[0.9rem]">
+                        {modifiedCombinedPrice}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="flex justify-between items-center mt-4">
+                <p className="text-rose900 text-[0.9rem] font-medium">
+                  Order Total
+                </p>
+                <h1 className="text-rose900 font-extrabold text-[1.4rem]">
+                  {`${modifiedTotalAmount}`}
+                </h1>
+              </div>
+            </div>
+            <button
+              onClick={resetOrder}
+              className="w-full hover:bg-[#8e290b] bg-customRed rounded-full text-rose50 font-medium py-3 text-[0.9rem]"
+            >
+              Start New Order
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

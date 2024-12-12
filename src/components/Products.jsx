@@ -20,6 +20,7 @@ export default function Products(props) {
   const addToCart = () => {
     const newProduct = {
       name: props.name,
+      img: props.thumbnailImg,
       price: props.price,
       amount: 1,
     };
